@@ -1,44 +1,71 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>मेरा पहला टूल</title>
+    <title>रील्स टूल</title>
+    <style>
+        /* ...existing CSS... */
+        .error { color: red; }
+    </style>
 </head>
 <body>
-    <h1>रील्स ऑप्टिमाइज़र टूल</h1>
-    <input type="file" id="videoUpload" accept="video/*">
-    <button onclick="processVideo()">वीडियो ऑप्टिमाइज़ करें</button>
-    <video id="preview" controls width="300"></video>
-    <div id="hashtags"></div>
+    <!-- ...existing HTML... -->
 
-    <!-- FFmpeg Script (यहाँ से कॉपी करें) -->
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.4/dist/ffmpeg.min.js"></script>
     <script>
         const { createFFmpeg } = FFmpeg;
-        const ffmpeg = createFFmpeg({ log: true });
+        const ffmpeg = createFFmpeg({ 
+            log: true,
+            progress: ({ ratio }) => {
+                const progress = Math.round(ratio * 100);
+                document.getElementById('progressBar').style.width = `${progress}%`;
+                document.getElementById('status').textContent = `प्रोसेसिंग: ${progress}%`;
+            }
+        });
 
-        // वीडियो प्रोसेस करने का फंक्शन
         async function processVideo() {
             const file = document.getElementById('videoUpload').files[0];
+            const processBtn = document.getElementById('processBtn');
             
-            // FFmpeg लोड करें
-            await ffmpeg.load();
-            
-            // वीडियो को 30 सेकंड में काटें
-            ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
-            await ffmpeg.run('-i', 'input.mp4', '-t', '30', 'output.mp4');
-            
-            // कटी हुई वीडियो दिखाएँ
-            const data = ffmpeg.FS('readFile', 'output.mp4');
-            const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-            document.getElementById('preview').src = url;
-            
-            // हैशटैग जनरेट करें
-            document.getElementById('hashtags').innerHTML = "#viral #trending #reels";
+            if(!file) {
+                showError("कृपया वीडियो चुनें");
+                return;
+            }
+
+            try {
+                processBtn.disabled = true;
+                document.getElementById('status').textContent = "FFmpeg लोड हो रहा है...";
+
+                if(!ffmpeg.isLoaded()) await ffmpeg.load();
+
+                document.getElementById('status').textContent = "वीडियो प्रोसेस हो रहा है...";
+                ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
+                
+                await ffmpeg.run('-i', 'input.mp4', '-t', '30', 'output.mp4');
+                
+                const data = ffmpeg.FS('readFile', 'output.mp4');
+                const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
+                document.getElementById('preview').src = url;
+                document.getElementById('hashtags').innerHTML = "#viral #trending";
+
+            } catch (error) {
+                showError("त्रुटि: " + error.message);
+                console.error(error);
+            } finally {
+                processBtn.disabled = false;
+            }
         }
 
-        // फाइल को पढ़ने का फंक्शन
+        function showError(message) {
+            document.getElementById('status').textContent = message;
+            document.getElementById('status').classList.add('error');
+        }
+
         async function fetchFile(file) {
-            return new Uint8Array(await file.arrayBuffer());
+            try {
+                return new Uint8Array(await file.arrayBuffer());
+            } catch (error) {
+                showError("फाइल पढ़ने में त्रुटि");
+                throw error;
+            }
         }
     </script>
 </body>
