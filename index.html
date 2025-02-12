@@ -1,23 +1,57 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>रील्स टूल</title>
+    <title>मेरा पहला टूल</title>
     <style>
-        /* ...existing CSS... */
-        .error { color: red; }
+        /* प्रोग्रेस बार स्टाइल */
+        .progress-container {
+            width: 300px;
+            height: 20px;
+            background-color: #f1f1f1;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        
+        .progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: #4CAF50;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        /* लोडिंग मैसेज */
+        .loading {
+            color: #2196F3;
+            font-weight: bold;
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
-    <!-- ...existing HTML... -->
+    <h1>रील्स ऑप्टिमाइज़र टूल</h1>
+    <input type="file" id="videoUpload" accept="video/*">
+    <button onclick="processVideo()" id="processBtn">वीडियो ऑप्टिमाइज़ करें</button>
+    
+    <!-- प्रोग्रेस बार -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="loading" id="status">Status: Ready</div>
+    
+    <video id="preview" controls width="300"></video>
+    <div id="hashtags"></div>
 
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.4/dist/ffmpeg.min.js"></script>
     <script>
         const { createFFmpeg } = FFmpeg;
         const ffmpeg = createFFmpeg({ 
             log: true,
             progress: ({ ratio }) => {
+                // प्रोग्रेस अपडेट
                 const progress = Math.round(ratio * 100);
                 document.getElementById('progressBar').style.width = `${progress}%`;
-                document.getElementById('status').textContent = `प्रोसेसिंग: ${progress}%`;
+                document.getElementById('status').textContent = `Processing: ${progress}%`;
             }
         });
 
@@ -26,46 +60,41 @@
             const processBtn = document.getElementById('processBtn');
             
             if(!file) {
-                showError("कृपया वीडियो चुनें");
+                alert("कृपया पहले वीडियो फाइल चुनें");
                 return;
             }
 
             try {
+                // बटन डिसेबल करें
                 processBtn.disabled = true;
-                document.getElementById('status').textContent = "FFmpeg लोड हो रहा है...";
+                document.getElementById('status').textContent = "Initializing...";
 
-                if(!ffmpeg.isLoaded()) await ffmpeg.load();
+                await ffmpeg.load();
+                document.getElementById('status').textContent = "Processing video...";
 
-                document.getElementById('status').textContent = "वीडियो प्रोसेस हो रहा है...";
+                // वीडियो प्रोसेसिंग
                 ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
-                
                 await ffmpeg.run('-i', 'input.mp4', '-t', '30', 'output.mp4');
-                
+
+                // रिजल्ट दिखाएं
                 const data = ffmpeg.FS('readFile', 'output.mp4');
                 const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
                 document.getElementById('preview').src = url;
-                document.getElementById('hashtags').innerHTML = "#viral #trending";
+                document.getElementById('hashtags').innerHTML = "#viral #trending #reels";
 
             } catch (error) {
-                showError("त्रुटि: " + error.message);
-                console.error(error);
+                console.error("Error:", error);
+                alert("प्रोसेसिंग में त्रुटि: " + error.message);
             } finally {
+                // रीसेट करें
                 processBtn.disabled = false;
+                document.getElementById('status').textContent = "Ready";
+                document.getElementById('progressBar').style.width = '0%';
             }
-        }
-
-        function showError(message) {
-            document.getElementById('status').textContent = message;
-            document.getElementById('status').classList.add('error');
         }
 
         async function fetchFile(file) {
-            try {
-                return new Uint8Array(await file.arrayBuffer());
-            } catch (error) {
-                showError("फाइल पढ़ने में त्रुटि");
-                throw error;
-            }
+            return new Uint8Array(await file.arrayBuffer());
         }
     </script>
 </body>
