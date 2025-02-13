@@ -1,100 +1,348 @@
 <!DOCTYPE html>
-<html>
+<html lang="hi">
 <head>
-    <title>मेरा पहला टूल</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Social Media Toolkit 🚀</title>
     <style>
-        /* प्रोग्रेस बार स्टाइल */
-        .progress-container {
-            width: 300px;
-            height: 20px;
-            background-color: #f1f1f1;
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 2rem;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        h1 {
+            color: #2d3436;
+            font-size: 2.2rem;
+            margin-bottom: 0.5rem;
+        }
+        .subhead {
+            color: #636e72;
+            font-size: 1rem;
+        }
+        .upload-section {
+            border: 2px dashed #b2bec3;
             border-radius: 10px;
+            padding: 2rem;
+            text-align: center;
+            margin: 2rem 0;
+            transition: 0.3s;
+        }
+        .upload-section:hover {
+            border-color: #4CAF50;
+            background: #f8fff8;
+        }
+        #videoUpload {
+            display: none;
+        }
+        .upload-label {
+            display: inline-block;
+            padding: 12px 25px;
+            background: #4CAF50;
+            color: white;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.3s;
             margin: 10px 0;
         }
-        
-        .progress-bar {
-            width: 0%;
-            height: 100%;
-            background-color: #4CAF50;
+        #video-preview {
+            width: 100%;
             border-radius: 10px;
-            transition: width 0.3s ease;
+            margin-top: 1rem;
+            background: #000;
+            max-height: 500px;
         }
-
-        /* लोडिंग मैसेज */
-        .loading {
-            color: #2196F3;
-            font-weight: bold;
-            margin: 10px 0;
+        .topic-section {
+            margin: 1.5rem 0;
+        }
+        .topic-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .topic-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            background: #e3f2fd;
+            color: #1976d2;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .topic-btn.active {
+            background: #bbdefb;
+            font-weight: 600;
+        }
+        .action-btns {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+        .platform-btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            background: linear-gradient(45deg, #833ab4, #fd1d1d);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .platform-btn.facebook {
+            background: linear-gradient(45deg, #1877f2, #0d47a1);
+        }
+        .result-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: -15px;
+            right: 10px;
+            background: #4CAF50;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            border: none;
+        }
+        .caption-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+        .hashtags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        .hashtag {
+            background: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            border: 1px solid #e0e0e0;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+        .score {
+            background: #4CAF50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-left: 8px;
+            font-size: 0.7em;
+        }
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            animation: slideUp 0.5s ease-out;
+            z-index: 1000;
+        }
+        @keyframes slideUp {
+            from { bottom: -50px; }
+            to { bottom: 20px; }
         }
     </style>
 </head>
 <body>
-    <h1>रील्स ऑप्टिमाइज़र टूल</h1>
-    <input type="file" id="videoUpload" accept="video/*">
-    <button onclick="processVideo()" id="processBtn">वीडियो ऑप्टिमाइज़ करें</button>
-    
-    <!-- प्रोग्रेस बार -->
-    <div class="progress-container">
-        <div class="progress-bar" id="progressBar"></div>
+    <div class="container">
+        <div class="header">
+            <h1>AI Social Media Toolkit 🚀</h1>
+            <p class="subhead">वीडियो अपलोड करें और पाएं कमाल के हैशटैग्स + कैप्शन!</p>
+        </div>
+
+        <div class="upload-section">
+            <input type="file" id="videoUpload" accept="video/*">
+            <label for="videoUpload" class="upload-label">
+                📁 Reels/Shorts अपलोड करें
+            </label>
+            <video id="video-preview" controls></video>
+        </div>
+
+        <div class="topic-section">
+            <div class="topic-buttons">
+                <button class="topic-btn" onclick="selectTopic('dance')">Dance 💃</button>
+                <button class="topic-btn" onclick="selectTopic('comedy')">Comedy 😂</button>
+                <button class="topic-btn" onclick="selectTopic('cooking')">Cooking 👩🍳</button>
+                <button class="topic-btn" onclick="selectTopic('fitness')">Fitness 💪</button>
+                <button class="topic-btn" onclick="selectTopic('travel')">Travel 🌍</button>
+            </div>
+        </div>
+
+        <div class="action-btns">
+            <button class="platform-btn" onclick="generateContent('instagram')">
+                <span>📸</span> Instagram
+            </button>
+            <button class="platform-btn facebook" onclick="generateContent('facebook')">
+                <span>📘</span> Facebook
+            </button>
+        </div>
+
+        <div class="result-box">
+            <button class="copy-btn" onclick="copyContent()">📋 सब कॉपी करें</button>
+            <div id="captionBox" class="caption-box"></div>
+            <div class="hashtags" id="hashtagBox"></div>
+        </div>
     </div>
-    <div class="loading" id="status">Status: Ready</div>
-    
-    <video id="preview" controls width="300"></video>
-    <div id="hashtags"></div>
 
-    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.4/dist/ffmpeg.min.js"></script>
     <script>
-        const { createFFmpeg } = FFmpeg;
-        const ffmpeg = createFFmpeg({ 
-            log: true,
-            progress: ({ ratio }) => {
-                // प्रोग्रेस अपडेट
-                const progress = Math.round(ratio * 100);
-                document.getElementById('progressBar').style.width = `${progress}%`;
-                document.getElementById('status').textContent = `Processing: ${progress}%`;
-            }
-        });
+        // ********************** 🔧 Configuration **********************
+        let selectedTopic = null;
+        const MAX_FILE_SIZE_MB = 100;
+        
+        const CAPTIONS = {
+            dance: [
+                "थिरकने का समय आ गया! 💃 #DanceMania",
+                "इस बीट पर बनाएं अपना स्टाइल 🎶 #ViralDance"
+            ],
+            comedy: [
+                "हंसी की गारंटी 😂 #ComedyKing",
+                "लॉल्स ओवरलोड! 🤣 #FunnyReels"
+            ],
+            cooking: [
+                "स्वाद का जादू यहीं देखें 👩🍳 #ChefSpecial",
+                "किचन में जादू! 🍳 #FoodMagic"
+            ],
+            fitness: [
+                "फिटनेस है तो जीतनेस है! 💪 #FitnessGoals",
+                "बॉडी बनाने का सही तरीका 🏋️ #GymLife"
+            ],
+            travel: [
+                "दुनिया देखने का सपना 🌍 #Wanderlust",
+                "अगली ट्रिप की तैयारी शुरू करें! ✈️ #TravelGoals"
+            ]
+        };
 
-        async function processVideo() {
-            const file = document.getElementById('videoUpload').files[0];
-            const processBtn = document.getElementById('processBtn');
-            
-            if(!file) {
-                alert("कृपया पहले वीडियो फाइल चुनें");
+        const HASHTAG_DB = {
+            dance: {
+                instagram: ["#DanceReels", "#InstaDance", "#DanceTrend", "#ViralDance", "#DanceFever"],
+                facebook: ["#FBDance", "#DanceVideosFB", "#FBDanceChallenge", "#TrendingDance", "#DanceLoversFB"]
+            },
+            comedy: {
+                instagram: ["#ComedyReels", "#InstaLOL", "#FunnyClips", "#ComedyKingIG", "#HasiKePal"],
+                facebook: ["#FBComedy", "#FBLaughs", "#FunnyViralFB", "#ComedyTimeFB", "#HasoHasao"]
+            },
+            cooking: {
+                instagram: ["#FoodieGram", "#InstaChef", "#CookingMagic", "#FoodVibes", "#YummyInMyTummy"],
+                facebook: ["#FBCooking", "#FoodLoversFB", "#HomeChefFB", "#DeliciousDishes", "#FoodieWorld"]
+            },
+            fitness: {
+                instinstagram: ["#FitGram", "#GymMotivation", "#FitnessJourney", "#WorkoutGoals", "#HealthyLiving"],
+                facebook: ["#FBFitness", "#GymLifeFB", "#FitnessFreaks", "#StayHealthyFB", "#BodyGoals"]
+            },
+            travel: {
+                instagram: ["#WanderlustIG", "#TravelDiaries", "#ExploreMore", "#TravelGram", "#NatureLovers"],
+                facebook: ["#TravelFB", "#AdventureTime", "#TravelGoalsFB", "#DiscoverWorld", "#TravelAddict"]
+            }
+        };
+
+        // ********************** 🛠️ Core Functions **********************
+        function selectTopic(topic) {
+            selectedTopic = topic;
+            document.querySelectorAll('.topic-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(topic));
+            });
+        }
+
+        document.getElementById('videoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if(!file) return;
+
+            if(file.size > MAX_FILE_SIZE_MB * 1024 * 1024) {
+                alert(`कृपया ${MAX_FILE_SIZE_MB}MB से छोटा वीडियो चुनें`);
+                this.value = '';
                 return;
             }
 
-            try {
-                // बटन डिसेबल करें
-                processBtn.disabled = true;
-                document.getElementById('status').textContent = "Initializing...";
-
-                await ffmpeg.load();
-                document.getElementById('status').textContent = "Processing video...";
-
-                // वीडियो प्रोसेसिंग
-                ffmpeg.FS('writeFile', 'input.mp4', await fetchFile(file));
-                await ffmpeg.run('-i', 'input.mp4', '-t', '30', 'output.mp4');
-
-                // रिजल्ट दिखाएं
-                const data = ffmpeg.FS('readFile', 'output.mp4');
-                const url = URL.createObjectURL(new Blob([data.buffer], { type: 'video/mp4' }));
-                document.getElementById('preview').src = url;
-                document.getElementById('hashtags').innerHTML = "#viral #trending #reels";
-
-            } catch (error) {
-                console.error("Error:", error);
-                alert("प्रोसेसिंग में त्रुटि: " + error.message);
-            } finally {
-                // रीसेट करें
-                processBtn.disabled = false;
-                document.getElementById('status').textContent = "Ready";
-                document.getElementById('progressBar').style.width = '0%';
+            if(!file.type.startsWith('video/')) {
+                alert('कृपया सिर्फ वीडियो फाइलें अपलोड करें');
+                this.value = '';
+                return;
             }
+
+            document.getElementById('video-preview').src = URL.createObjectURL(file);
+        });
+
+        function generateContent(platform) {
+            if(!selectedTopic) {
+                alert("कृपया कोई टॉपिक चुनें");
+                return;
+            }
+
+            // Generate Caption
+            const caption = CAPTIONS[selectedTopic][Math.floor(Math.random()*CAPTIONS[selectedTopic].length)];
+            document.getElementById('captionBox').textContent = caption;
+
+            // Generate Hashtags
+            const platformHashtags = HASHTAG_DB[selectedTopic][platform] || [];
+            const commonHashtags = ["#ViralVideo", "#TrendingNow", "#MustWatch", "#ExplorePage"];
+            
+            // Mix hashtags (60% platform-specific + 40% common)
+            const allHashtags = [
+                ...platformHashtags.slice(0,9),
+                ...commonHashtags.slice(0,6)
+            ].sort(() => Math.random() - 0.5);
+
+            // Display with Scores
+            document.getElementById('hashtagBox').innerHTML = allHashtags
+                .map((tag, index) => `
+                    <div class="hashtag">
+                        ${tag}
+                        <span class="score">${Math.min(index + 7, 10)}/10</span>
+                    </div>
+                `).slice(0,15).join('');
         }
 
-        async function fetchFile(file) {
-            return new Uint8Array(await file.arrayBuffer());
+        function copyContent() {
+            const caption = document.getElementById('captionBox').innerText;
+            const hashtags = Array.from(document.querySelectorAll('.hashtag'))
+                                .map(el => el.innerText.replace(/\/10/g, ''))
+                                .join(' ');
+
+            navigator.clipboard.writeText(`${caption}\n\n${hashtags}`);
+
+            // Show Notification
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.textContent = '✅ सब कॉपी हो गया!';
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 2000);
         }
     </script>
 </body>
